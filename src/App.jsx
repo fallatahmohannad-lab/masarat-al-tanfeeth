@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useApp } from './context/AppStateContext.jsx'
 import TopBar from './components/common/TopBar.jsx'
 import Stepper from './components/common/Stepper.jsx'
+import GuidedTour from './components/common/GuidedTour.jsx'
 
 import OnboardingContainer from './components/steps/OnboardingContainer.jsx'
 import ContractorDashboard from './components/steps/ContractorDashboard.jsx'
@@ -41,6 +42,7 @@ export default function App() {
       <main className="mx-auto max-w-[1280px] px-4 py-6 sm:py-8">
         {isHome ? <ContractorDashboard /> : <View />}
       </main>
+      <GuidedTour />
     </div>
   )
 }
