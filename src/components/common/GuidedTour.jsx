@@ -131,7 +131,7 @@ export default function GuidedTour() {
       <button
         onClick={restart}
         dir={dir}
-        className="fixed bottom-5 z-50 inline-flex items-center gap-2 rounded-full bg-cyan-500 px-4 py-3 text-sm font-bold text-white shadow-lift transition hover:bg-cyan-600 ltr:right-5 rtl:left-5"
+        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-cyan-500 px-4 py-3 text-sm font-bold text-white shadow-lift transition hover:bg-cyan-600"
       >
         <span className="relative grid h-6 w-6 place-items-center">
           <span className="absolute inline-flex h-6 w-6 animate-ping rounded-full bg-white/40" />
@@ -146,12 +146,10 @@ export default function GuidedTour() {
 
   return (
     <>
-      {/* very light, click-through scrim so the page stays visible */}
-      <div className="fixed inset-0 z-40 bg-teal-900/10 pointer-events-none" />
-
+      {/* no full scrim — the assistant docks to the right and never blocks the page */}
       <div
         dir={dir}
-        className="fixed bottom-5 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 animate-pop"
+        className="fixed right-4 top-1/2 z-50 max-h-[88vh] w-[340px] max-w-[88vw] -translate-y-1/2 overflow-y-auto animate-pop sm:right-5"
       >
         <div className="overflow-hidden rounded-2xl border border-cyan-200 bg-white shadow-lift">
           {/* progress bar */}
