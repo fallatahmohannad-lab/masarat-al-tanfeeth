@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Languages, ShieldCheck, Mail, BadgeCheck, Building2, Layers, Cpu, CheckCircle2,
-  ArrowLeft, ArrowRight, Briefcase, Users, Lock, Sparkles,
+  ArrowLeft, ArrowRight, Briefcase, Users, Lock, Sparkles, LogIn,
 } from 'lucide-react'
 import { useApp } from '../../context/AppStateContext.jsx'
 import { Card, Badge } from '../common/ui.jsx'
@@ -35,6 +35,12 @@ export default function OnboardingContainer() {
       tier,
     })
   }
+  // One-click guest entry — skips sign-up straight into the platform + tour.
+  const guestEnter = () =>
+    login({
+      profile: { companyEmail: 'guest@masarat.demo', crNumber: '0000000000', sector: 'engineering', companySize: 'sme', localContentTarget: 65 },
+      tier: 'growth_sme',
+    })
 
   return (
     <div className="min-h-screen bg-page" dir={dir}>
@@ -61,6 +67,20 @@ export default function OnboardingContainer() {
           <Badge tone="info" className="mx-auto"><Sparkles className="h-3.5 w-3.5" /> SIDF #4000003855</Badge>
           <h1 className="mt-3 text-2xl font-bold text-teal-900 sm:text-3xl">{t('ob_welcome')}</h1>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-teal-600">{t('ob_welcome_sub')}</p>
+
+          {/* One-click guest entry */}
+          <div className="mt-4 flex flex-col items-center gap-1.5">
+            <button onClick={guestEnter} className="btn-primary px-6 py-3 text-base shadow-lift">
+              <LogIn className="h-5 w-5" /> {t('ob_guest')}
+            </button>
+            <span className="text-xs text-teal-500">{t('ob_guest_note')}</span>
+          </div>
+
+          <div className="mx-auto mt-5 flex max-w-xs items-center gap-3 text-xs text-teal-400">
+            <span className="h-px flex-1 bg-line" />
+            {t('ob_or')}
+            <span className="h-px flex-1 bg-line" />
+          </div>
         </div>
 
         {/* SECTION A + B (split) */}

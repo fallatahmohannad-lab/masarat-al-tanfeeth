@@ -72,6 +72,9 @@ export const DICT = {
   ob_selected: { ar: 'الباقة المختارة', en: 'Selected' },
   ob_activate: { ar: 'تفعيل الحساب والدخول', en: 'Activate account & enter' },
   ob_need_all: { ar: 'أكمل البريد والسجل التجاري واختيار الباقة للتفعيل.', en: 'Complete email, CR, and plan selection to activate.' },
+  ob_guest: { ar: 'استعرض كزائر', en: 'Explore as guest' },
+  ob_guest_note: { ar: 'تجاوز التسجيل وادخل مباشرةً لتجربة المنصة والجولة الإرشادية.', en: 'Skip sign-up and jump straight into the platform and the guided tour.' },
+  ob_or: { ar: 'أو', en: 'or' },
 
   size_micro: { ar: 'منشأة متناهية الصغر', en: 'Micro-entity' },
   size_sme: { ar: 'منشأة صغيرة ومتوسطة (SME)', en: 'SME' },
