@@ -5,6 +5,7 @@ import { Card, Badge, Banner, SectionTitle } from '../common/ui.jsx'
 import StepShell from '../common/StepShell.jsx'
 import StepNav from '../common/StepNav.jsx'
 import { LocalContentValidatorWidget } from './StrategicUXEnhancements.jsx'
+import ChangeRequestFlow from './ChangeRequestFlow.jsx'
 import { WBS_MATRIX, BOQ_MATRIX } from '../../data/aiFlow.js'
 import { fmtSAR } from '../../data/mock.js'
 
@@ -19,6 +20,7 @@ export default function Step3ClaimValidation() {
   if (!state.awarded) {
     return (
       <StepShell step={3} title={tx({ ar: 'التحقق ورفع المستخلص', en: 'Claim Validation' })}>
+        <ChangeRequestFlow />
         <Banner tone="warn" icon={Cpu} title={tx({ ar: 'يلزم إتمام الترسية أولًا (الخطوة 2).', en: 'The award must complete first (Step 2).' })} />
         <StepNav hideNext />
       </StepShell>
@@ -32,6 +34,7 @@ export default function Step3ClaimValidation() {
       subtitle={tx({ ar: 'بعد تنفيذ الأعمال، يرفع المقاول المستخلص ويتحقق محرّك الامتثال الذكي من مطابقته لـ WBS/BOQ المعتمدة قبل الإرسال إلى «اعتماد».', en: 'After delivery, the contractor raises the claim and the AI compliance engine matches it to the approved WBS/BOQ before submitting to Etimad.' })}
       aside={<Badge tone="info"><Cpu className="h-3.5 w-3.5" /> {tx({ ar: 'المرحلة: التحقق من المستخلص', en: 'Stage: claim validation' })}</Badge>}
     >
+      <ChangeRequestFlow />
       {!state.claimRaised ? (
         <Card className="card-pad">
           <div className="flex flex-col items-center py-6 text-center">

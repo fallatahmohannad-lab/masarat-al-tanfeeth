@@ -30,7 +30,7 @@ Requires Node.js ≥ 18.
 |------|--------|--------------------|
 | 1 | **Start the bid** (ابدأ العرض) | Pick the RFP, then *Price it* (smart suggestion + low-price warning), *Plan it* (auto milestone checklist), *Check the numbers* (cash-flow). Nothing is auto-submitted. |
 | 2 | **Record delivery** (سجّل التسليم) | Mark each milestone delivered and attach proof — on mobile, or auto-sync from your system. Live progress panel. |
-| 3 | **Check & changes** (المراجعة والتغييرات) | Auto quantity match (mismatches flagged amber), flag a faulty item, and handle a change request with its impact on scope/spec/schedule/local content. Payment holds until the change is cleared. |
+| 3 | **Check & changes** (المراجعة والتغييرات) | Hosts the end-to-end **change-request flow** (role-aware): the Owner raises a change → Sara studies it in a 3-stage panel (Price it / Technical study across 4 impact axes / Financial study) → Khalid reviews with an advisory "smart assistant recommendation" and Approves or Rejects (with reason). Approval **adds the change to the approved plan**: a new scope item appears in Step 2, the contract total updates, and the payment hold is released. Rejection leaves the plan untouched. |
 | 4 | **Submit to Etimad** (الإرسال إلى اعتماد) | Run the local-content check, then submit a verified claim. The Owner role sees the verified claim with proof. |
 | 5 | **Dashboard & payment** (المتابعة والدفع) | KPI cards (claim status, days-to-payment, cost of delay, local-content score), the locked activity history, and Owner payment approval → *Paid & closed ✓*. Financier sees a *Safe to finance* badge. |
 
@@ -89,5 +89,12 @@ app/
 - **Bilingual + RTL** — `lang` lives in context; `<html dir lang>` is synced in `App`. Shared
   strings use `t('key')`; inline strings use `tx({ ar, en })`.
 - **No backend** — all data is mock and in-memory. The **Restart** button (top bar) resets state.
+- **Change-request flow** (`ChangeRequestFlow.jsx`, embedded in Step 3) implements the Git-style
+  change governance from the research report — a small approval state machine
+  (`none → sent_to_contractor → under_study → submitted_for_review → merged | rejected`) held
+  entirely in the `change` slice of the reducer. Owner / Sara / Khalid each see their own role view
+  of the same shared request, and an approval (`merged`) is reflected across Steps 2 and 5 through
+  the existing components. The Git/branch/merge terminology lives **only** in code comments and
+  this README — the UI uses plain language ("added to the approved plan", "updated study").
 
 _Built for the MIS 698 graduation research project — Masaraat._

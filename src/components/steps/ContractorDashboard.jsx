@@ -5,7 +5,6 @@ import {
 import { useApp } from '../../context/AppStateContext.jsx'
 import { Card, Badge, Banner, ProgressBar, SectionTitle } from '../common/ui.jsx'
 import { PROJECTS, WBS_MATRIX } from '../../data/aiFlow.js'
-import { fmtSAR } from '../../data/mock.js'
 
 const STATUS_TONE = { completed: 'ok', active: 'cyan', delayed: 'bad' }
 const PAY_TONE = { paid: 'ok', partial: 'cyan', pending: 'warn', held: 'bad' }

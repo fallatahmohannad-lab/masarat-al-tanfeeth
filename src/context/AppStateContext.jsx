@@ -16,6 +16,10 @@ const log = (state, actor, ar, en) => ({
   activity: [...state.activity, { id: nextId(), actor, ar, en }],
 })
 
+// Base approved contract value (SAR). An approved change request adds its value
+// on top of this everywhere the total is shown.
+const CONTRACT_BASE = 4_180_000
+
 // A price line is "too low" when it is more than 25% below the smart suggestion.
 export function withLowFlags(items) {
   return items.map((it) => ({
@@ -117,6 +121,22 @@ const initialState = {
   financingRequested: false,
   fundApproved: false,
   generatedRevenue: 0,
+
+  // ---- Change-request flow (Owner raises → Sara studies → Khalid decides) ----
+  // Implements the Git-style change governance from the research report, but every
+  // user-facing label is plain language (no Git / branch / merge / baseline terms).
+  // Status path: none → sent_to_contractor → under_study → submitted_for_review
+  //              → merged (approved) | rejected
+  change: {
+    status: 'none',
+    title: '',
+    desc: '',
+    item: 'new_scope', // a milestone id or 'new_scope'
+    suggested: 320000, // mock smart-price benchmark (SAR)
+    price: 320000, // Sara's priced amount; "too low" if < 75% of the suggestion
+    impacts: { scope: 'minor', spec: 'none', schedule: 'minor', local: 'none' }, // none|minor|major (mock AI defaults, editable)
+    rejectReason: '',
+  },
 
   activity: [{ id: nextId(), actor: 'system', ar: 'تم استلام الكراسة', en: 'RFP received' }],
 }
@@ -314,6 +334,31 @@ function reducer(state, a) {
         'Approved & funded — the Movement Engine generated real project revenue',
       )
 
+    // ---- Change-request flow reducers (plain-language UI; governance in comments) ----
+    case 'RAISE_CHANGE':
+      return log(
+        { ...state, change: { ...initialState.change, status: 'sent_to_contractor', title: a.title, desc: a.desc, item: a.item } },
+        'owner',
+        `طلبت الجهة تغييرًا: ${a.title}`,
+        `Authority raised a change: ${a.title}`,
+      )
+    case 'OPEN_CHANGE_STUDY':
+      if (state.change.status !== 'sent_to_contractor') return state
+      return log({ ...state, change: { ...state.change, status: 'under_study' } }, 'sara', 'بدأ المقاول دراسة طلب التغيير', 'Contractor started studying the change')
+    case 'SET_CHANGE_PRICE':
+      return { ...state, change: { ...state.change, price: Math.max(0, a.val) } }
+    case 'SET_CHANGE_IMPACT':
+      return { ...state, change: { ...state.change, impacts: { ...state.change.impacts, [a.axis]: a.level } } }
+    case 'SEND_CHANGE_FOR_REVIEW':
+      return log({ ...state, change: { ...state.change, status: 'submitted_for_review' } }, 'sara', 'أرسل المقاول الدراسة المعدّلة للمراجعة', 'Contractor sent the updated study for review')
+    case 'APPROVE_CHANGE': {
+      // approved → merged: the change becomes part of the approved plan.
+      const approved = log({ ...state, change: { ...state.change, status: 'merged' } }, 'khalid', 'اعتمد المُقيّم طلب التغيير', 'Inspector approved the change request')
+      return log(approved, 'system', 'دُمج التغيير في الخطة المعتمدة وحُدّثت قيمة العقد', 'Change added to the approved plan; contract value updated')
+    }
+    case 'REJECT_CHANGE':
+      return log({ ...state, change: { ...state.change, status: 'rejected', rejectReason: a.reason || '' } }, 'khalid', 'رفض المُقيّم طلب التغيير', 'Inspector rejected the change request')
+
     case 'RESET':
       return {
         ...initialState,
@@ -352,14 +397,25 @@ export function AppStateProvider({ children }) {
 
   // AI-governed workflow progress
   const auditDone = state.auditGenerated && state.auditItems.length > 0 && state.auditItems.every((i) => i.status !== 'pending')
-  const stepDone = {
-    1: state.bookletBought, // matching & pricing → booklet bought
-    2: state.awarded, // study generated & awarded
-    3: state.claimSubmitted, // claim validated & submitted
-    4: auditDone, // smart audit complete
-    5: state.fundApproved, // financed
-  }
-  const progress = Math.round((Object.values(stepDone).filter(Boolean).length / 5) * 100)
+  const stepDone = useMemo(
+    () => ({
+      1: state.bookletBought, // matching & pricing → booklet bought
+      2: state.awarded, // study generated & awarded
+      3: state.claimSubmitted, // claim validated & submitted
+      4: auditDone, // smart audit complete
+      5: state.fundApproved, // financed
+    }),
+    [state.bookletBought, state.awarded, state.claimSubmitted, auditDone, state.fundApproved],
+  )
+  const progress = useMemo(() => Math.round((Object.values(stepDone).filter(Boolean).length / 5) * 100), [stepDone])
+
+  // ---- change-request derived (shared so every role/step reflects it) ----
+  const ch = state.change
+  const changeMerged = ch.status === 'merged'
+  const changePending = ['sent_to_contractor', 'under_study', 'submitted_for_review'].includes(ch.status)
+  const changeValue = changeMerged ? ch.price : 0 // value added to the plan only once merged
+  const contractTotal = CONTRACT_BASE + changeValue
+  const paymentHeldByChange = changePending // payment is paused while a change is pending
 
   const actions = useMemo(
     () => ({
@@ -409,6 +465,14 @@ export function AppStateProvider({ children }) {
       auditDecision: (id, decision) => dispatch({ type: 'AUDIT_DECISION', id, decision }),
       requestFinancing: () => dispatch({ type: 'REQUEST_FINANCING' }),
       approveFund: () => dispatch({ type: 'APPROVE_FUND' }),
+      // Change-request flow actions
+      raiseChange: (title, desc, item) => dispatch({ type: 'RAISE_CHANGE', title, desc, item }),
+      openChangeStudy: () => dispatch({ type: 'OPEN_CHANGE_STUDY' }),
+      setChangePrice: (val) => dispatch({ type: 'SET_CHANGE_PRICE', val }),
+      setChangeImpact: (axis, level) => dispatch({ type: 'SET_CHANGE_IMPACT', axis, level }),
+      sendChangeForReview: () => dispatch({ type: 'SEND_CHANGE_FOR_REVIEW' }),
+      approveChange: () => dispatch({ type: 'APPROVE_CHANGE' }),
+      rejectChange: (reason) => dispatch({ type: 'REJECT_CHANGE', reason }),
       reset: () => dispatch({ type: 'RESET' }),
     }),
     [lang, state.step],
@@ -419,9 +483,10 @@ export function AppStateProvider({ children }) {
       state, lang, dir, t, tx,
       deliveredCount, proofCount, allDelivered, changeCleared, localPass, localContentMet, canSubmit, paidClosed,
       auditDone, stepDone, progress, STEPS,
+      changeMerged, changePending, changeValue, contractTotal, paymentHeldByChange, CONTRACT_BASE,
       ...actions,
     }),
-    [state, lang, dir, t, tx, deliveredCount, proofCount, allDelivered, changeCleared, localPass, localContentMet, canSubmit, paidClosed, auditDone, progress, actions],
+    [state, lang, dir, t, tx, deliveredCount, proofCount, allDelivered, changeCleared, localPass, localContentMet, canSubmit, paidClosed, auditDone, stepDone, progress, changeMerged, changePending, changeValue, contractTotal, paymentHeldByChange, actions],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

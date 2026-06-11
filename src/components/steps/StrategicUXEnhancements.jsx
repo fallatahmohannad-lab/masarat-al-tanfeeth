@@ -86,7 +86,7 @@ export function FeedbackCountdownWidget({ isRejected, rejectionDate }) {
 
 // ──────────────────── 2 · Local-content validator (LCGPA gate) ─────────────
 export function LocalContentValidatorWidget({ currentScore, targetScore, claimValue }) {
-  const { lang, tx, state, localizeMaterial } = useApp()
+  const { tx, state, localizeMaterial } = useApp()
   const met = currentScore >= targetScore
   const gap = Math.max(0, targetScore - currentScore)
   const nonCompliantBase = Math.round(claimValue * (gap / 100))

@@ -10,7 +10,7 @@ import { ETIMAD_MATCHES } from '../../data/aiFlow.js'
 import { fmtSAR } from '../../data/mock.js'
 
 export default function Step1Matching() {
-  const { state, lang, tx, selectTender, runPricing, buyBooklet } = useApp()
+  const { state, tx, selectTender, runPricing, buyBooklet } = useApp()
   const [pricing, setPricing] = useState(false)
   const tender = ETIMAD_MATCHES.find((t) => t.id === state.selectedTender) || ETIMAD_MATCHES[0]
   const expectedProfit = Math.round((tender.value * tender.marginPct) / 100)

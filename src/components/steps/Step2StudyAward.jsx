@@ -10,7 +10,7 @@ import { WBS_MATRIX, BOQ_MATRIX } from '../../data/aiFlow.js'
 import { fmtSAR } from '../../data/mock.js'
 
 export default function Step2StudyAward() {
-  const { state, tx, generateStudy, simulateAward } = useApp()
+  const { state, tx, generateStudy, simulateAward, changeMerged } = useApp()
   const [running, setRunning] = useState(false)
   const [awarding, setAwarding] = useState(false)
   const boqTotal = BOQ_MATRIX.reduce((s, b) => s + b.qty * b.rate, 0)
@@ -70,6 +70,16 @@ export default function Step2StudyAward() {
                     <Badge tone="info">{w.weight}%</Badge>
                   </li>
                 ))}
+                {changeMerged && (
+                  <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ok-100 bg-ok-50 px-3 py-2 text-sm">
+                    <span className="flex items-center gap-2 text-teal-800">
+                      <span className="font-mono text-xs text-ok-600">+</span>
+                      {state.change.title}
+                      <span className="text-xs text-ok-600">({tx({ ar: 'مُضاف بطلب تغيير معتمد', en: 'added by approved change' })})</span>
+                    </span>
+                    <Badge tone="ok">{fmtSAR(state.change.price)} {tx({ ar: 'ر.س', en: 'SAR' })}</Badge>
+                  </li>
+                )}
               </ul>
             </Card>
 

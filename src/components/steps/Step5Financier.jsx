@@ -8,7 +8,7 @@ import { FrameworkTaskPortfolio } from './StrategicUXEnhancements.jsx'
 import { fmtSAR } from '../../data/mock.js'
 
 export default function Step5Financier() {
-  const { state, tx, requestFinancing, approveFund } = useApp()
+  const { state, tx, requestFinancing, approveFund, changeMerged, changeValue, contractTotal, paymentHeldByChange } = useApp()
   const isFinancier = state.role === 'financier'
   const isSara = state.role === 'sara'
   const sar = tx({ ar: 'ر.س', en: 'SAR' })
@@ -39,6 +39,20 @@ export default function Step5Financier() {
         <Kpi icon={ShieldAlert} label={tx({ ar: 'عامل المخاطر', en: 'Risk factor' })} value={`${state.riskFactor}%`} tone={riskTone} />
         <Kpi icon={TrendingUp} label={tx({ ar: 'إيراد مُتحقّق', en: 'Realized revenue' })} value={`${fmtSAR(state.generatedRevenue)} ${sar}`} tone="ok" small />
       </div>
+
+      {/* Change-request reflections: updated contract total + payment hold */}
+      {paymentHeldByChange && (
+        <div className="mt-4">
+          <Banner tone="warn" icon={Cpu} title={tx({ ar: 'الدفع متوقّف مؤقتًا حتى يُحسم طلب التغيير.', en: 'Payment is paused until the change request is resolved.' })} />
+        </div>
+      )}
+      {changeMerged && (
+        <div className="mt-4">
+          <Banner tone="ok" icon={CheckCircle2} title={tx({ ar: `قيمة العقد المحدّثة: ${fmtSAR(contractTotal)} ر.س`, en: `Updated contract value: ${fmtSAR(contractTotal)} SAR` })}>
+            {tx({ ar: `شامل تغييرًا معتمدًا بقيمة ${fmtSAR(changeValue)} ر.س — واستؤنف الدفع على الخطة المحدّثة.`, en: `Includes an approved change of ${fmtSAR(changeValue)} SAR — payment resumed on the updated plan.` })}
+          </Banner>
+        </div>
+      )}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="space-y-5">
